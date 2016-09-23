@@ -1,0 +1,11 @@
+*.pyc
+*.idea
+*.sqlite3
+*.DS_Store
+MyObserver/.DS_Store
+MyObserver/settings.py
+celerybeat-schedule
+celerybeat.pid
+*.log
+log/*.log
+doc/*
