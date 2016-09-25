@@ -1,10 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}My Sensor app{% endblock %}
+
+{% block container %}
+    <div class="container">
+        <form class="starter-template">
+            <fieldset>
+
+            <!-- Form Name -->
+            <legend>Upload your CSV file</legend>
+
+            <!-- File Button -->
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="filebutton">CSV FIle</label>
+                <div class="col-md-4">
+                <input id="filebutton" name="filebutton" class="input-file" type="file">
+                </div>
+            </div>
+
+            </fieldset>
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+    </div><!-- /.container -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+{% endblock %}
