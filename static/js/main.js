@@ -1,13 +1,12 @@
 function draw_chart(data) {
-
     // Glucose Average by Day chart
-     var avgByDayOptions = {
+     var chartOptions = {
         chart: {
             renderTo: 'chart_panel',
             type: 'line'
         },
-        legend: {enabled: false},
-        title: {text: 'Average Glucose by Day'},
+        legend: {enabled: true},
+        title: {text: 'Custom Chart'},
         subtitle: {text: 'Last 14 Days'},
         xAxis: {title: {text: null}, labels: {rotation: -45}},
         yAxis: {title: {text: null}},
@@ -15,10 +14,21 @@ function draw_chart(data) {
     };
 
 
-    avgByDayOptions.xAxis.categories = data["dates"];
-    avgByDayOptions.series[0].name = 'Avg Glucose (mg/dL)';
-    avgByDayOptions.series[0].data = data["temperature"];
-    var chart = new Highcharts.Chart(avgByDayOptions);
+    chartOptions.xAxis.categories = data["dates"];
+    signal = data["signal"];
+    chartOptions.series[0].name = get_legend(signal);
+    chartOptions.series[0].data = data[signal];
+    var chart = new Highcharts.Chart(chartOptions);
+}
+
+
+function get_legend(signal) {
+    if(signal == 'temperature'){
+        legend = 'Avg Temperature (ºC)';
+    }else if(signal == 'rainfall'){
+        legend = 'Total Rainfall (mm)';
+    }
+    return legend;
 }
 
 
@@ -41,13 +51,12 @@ function create_chart() {
         // handle a successful response
         success : function(json) {
             console.log(json); // log the returned json to the console
-            data = {"dates": ['09-21', '09-22'], "temperature": [22.5, 25.7]};
-            draw_chart(data);
+            draw_chart(json["chart_data"]);
             console.log("success"); // another sanity check
         },
 
         // handle a non-successful response
-        error : function(xhr,errmsg,err) {
+        error : function(xhr, errmsg, err) {
             $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
                 " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
             console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console

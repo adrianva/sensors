@@ -8,6 +8,7 @@ class ChartData(object):
 
             if not data.has_key(signal.signal_id):
                 data[signal.signal_id] = []
+                data['signal'] = signal.signal_id
 
             data[signal.signal_id].append(signal.value)
 

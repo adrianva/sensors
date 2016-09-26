@@ -27,7 +27,7 @@ class SignalTestCase(TestCase):
                               value=34.7)
 
     def test_convert_to_json(self):
-        expected_data = {'dates': ['09-20', '09-21'], 'temperature': [32.5, 34.7]}
+        expected_data = {'dates': ['09-20', '09-21'], 'temperature': [32.5, 34.7], 'signal': 'temperature'}
 
         signals = Signal.objects.filter(sensor_id='sensor-1')
         report_data = reports.ChartData.convert_data_to_json(signals)
