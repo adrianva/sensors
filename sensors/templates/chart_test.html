@@ -4,7 +4,7 @@
 
 {% block container %}
 <div class="container">
-    <form id="post-chart" class="form-horizontal" action="{% url 'sensors:charts' %}" method="get">
+    <form id="post-chart" class="form-horizontal starter-template" action="{% url 'sensors:charts' %}" method="get">
     {% csrf_token %}
     <fieldset>
 
@@ -27,8 +27,9 @@
         <label class="col-md-4 control-label" for="selectbasic">Signal</label>
         <div class="col-md-4">
             <select id="signal" name="signal" class="form-control">
-                <option value="temperature">Temperature</option>
-                <option value="rainfall">Rainfall</option>
+                {% for value in request.session.signal_types %}
+                    <option value="{{ value }}">{{ value }}</option>
+                {% endfor %}
             </select>
         </div>
     </div>

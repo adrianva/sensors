@@ -14,3 +14,15 @@ class Signal(models.Model):
         db_table = "signal"
 
 
+class Sensor(models.Model):
+    sensor_id = models.CharField(max_length=20, primary_key=True)
+
+    class Meta:
+        db_table = "sensor"
+
+
+class SignalType(models.Model):
+    signal_type = models.CharField(max_length=20, primary_key=True)
+
+    class Meta:
+        db_table = "signal_type"

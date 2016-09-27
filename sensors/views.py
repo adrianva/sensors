@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import HttpResponse
 import json
 
-from sensors.models import Signal
+from sensors.models import Signal, SignalType, Sensor
 import reports
 
 
@@ -15,10 +15,22 @@ def charts(request):
     signal_id = request.GET.get('signal', None)
     if sensor_id:
         data = {}
-        signals = Signal.objects.filter(sensor_id=sensor_id, signal_id=signal_id)
+        signals = Signal.objects.filter(sensor_id=sensor_id, signal_id=signal_id).order_by('date')
         data['chart_data'] = reports.ChartData.convert_data_to_json(signals)
 
         return HttpResponse(json.dumps(data), content_type='application/json')
     else:
-        form_submitted = False
-        return render(request, 'chart_test.html', form_submitted)
+        request = __init_session(request)
+        return render(request, 'chart_test.html')
+
+
+def __init_session(request):
+    if "signal_types" not in request.session:
+        signal_types = SignalType.objects.values_list('signal_type', flat=True).all()
+        request.session["signal_types"] = list(signal_types)
+
+    if "sensors" not in request.session:
+        sensors = Sensor.objects.values_list('sensor_id', flat=True).all()
+        request.session["sensors"] = list(sensors)
+
+    return request
