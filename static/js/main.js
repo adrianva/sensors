@@ -32,8 +32,8 @@ function get_legend(signal) {
 }
 
 
-// Submit post on submit
-$('#post-chart').on('submit', function(event){
+// Submit chart on submit
+$('#form-chart').on('submit', function(event){
     event.preventDefault();
     console.log("form submitted!");  // sanity check
     create_chart();
@@ -46,7 +46,7 @@ function create_chart() {
     $.ajax({
         url : "", // the endpoint
         type : "GET", // http method
-        data : { sensor : $('#sensor').val(), signal: $('#signal').val() }, // data sent with the post request
+        data : { sensor : $('#sensor').val(), signal: $('#signal').val() },
 
         // handle a successful response
         success : function(json) {
@@ -57,7 +57,46 @@ function create_chart() {
 
         // handle a non-successful response
         error : function(xhr, errmsg, err) {
-            $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+            $('#chart_panel').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+                " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+        }
+    });
+}
+
+
+// Submit csv on submit
+$('#form-csv').on('submit', function(event){
+    event.preventDefault();
+    console.log("form submitted!");  // sanity check
+    upload_csv();
+});
+
+
+// AJAX for upload csv file
+function upload_csv() {
+    console.log("upload csv is working!"); // sanity check
+    var data = new FormData($('form').get(0));
+
+    $.ajax({
+        url : "/", // the endpoint
+        type : "POST", // http method
+        contentType: false,
+        dataType: 'json',
+        data : data,
+        processData: false,
+
+        // handle a successful response
+        success : function(json) {
+            console.log(json); // log the returned json to the console
+            $('#feedback').html("<div class='alert-box alert radius' data-alert>Data successfully uploaded! " +
+                " <a href='#' class='close'>&times;</a></div>"); // add the success msg to the dom
+            console.log("success"); // another sanity check
+        },
+
+        // handle a non-successful response
+        error : function(xhr, errmsg, err) {
+            $('#feedback').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
                 " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
             console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
         }

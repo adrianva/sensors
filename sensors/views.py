@@ -1,12 +1,21 @@
 from django.shortcuts import render
 from django.shortcuts import HttpResponse
 import json
+import csv
 
 from sensors.models import Signal, SignalType, Sensor
 import reports
 
 
 def upload_csv(request):
+    if request.method == 'POST':
+        data = {}
+        content = csv.reader(request.FILES['filebutton'])
+        for row in content:
+            print(row)
+        data["success"] = "success"
+        return HttpResponse(json.dumps(data), content_type='application/json')
+
     return render(request, 'upload_csv.html')
 
 

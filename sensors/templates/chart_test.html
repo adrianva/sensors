@@ -4,7 +4,7 @@
 
 {% block container %}
 <div class="container">
-    <form id="post-chart" class="form-horizontal starter-template" action="{% url 'sensors:charts' %}" method="get">
+    <form id="form-chart" class="form-horizontal starter-template" action="{% url 'sensors:charts' %}" method="get">
     {% csrf_token %}
     <fieldset>
 
