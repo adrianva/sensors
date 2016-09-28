@@ -1,5 +1,5 @@
 from django.test import TestCase
-from sensors.models import Signal
+from sensors.models import Signal, SignalManager
 import reports
 
 
@@ -33,3 +33,17 @@ class SignalTestCase(TestCase):
         report_data = reports.ChartData.convert_data_to_json(signals)
 
         self.assertEqual(expected_data, report_data)
+
+    def test_parse_csv_filename(self):
+        filename = "sensor1-20092016.csv"
+
+        sensor_id, date = Signal.objects.parse_csv_filename(filename)
+
+        self.assertEqual("sensor1", sensor_id)
+        self.assertEqual("20092016", date)
+
+    def test_process_csv(self):
+        with open("tests/test-20092016.csv", "rb") as csvfile:
+            Signal.objects.process_csv(csvfile)
+
+        self.assertEqual(True, Signal.objects.filter(sensor_id="test").count() == 1)

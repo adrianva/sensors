@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.shortcuts import HttpResponse
+from django.db import transaction
 import json
 import csv
 
@@ -7,12 +8,11 @@ from sensors.models import Signal, SignalType, Sensor
 import reports
 
 
+@transaction.atomic
 def upload_csv(request):
     if request.method == 'POST':
         data = {}
-        content = csv.reader(request.FILES['filebutton'])
-        for row in content:
-            print(row)
+        Signal.objects.process_csv(request.FILES["filebutton"])
         data["success"] = "success"
         return HttpResponse(json.dumps(data), content_type='application/json')
 
