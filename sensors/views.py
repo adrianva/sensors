@@ -35,10 +35,12 @@ def charts(request):
 def __init_session(request):
     if "signal_types" not in request.session:
         signal_types = SignalType.objects.values_list('signal_type', flat=True).all()
-        request.session["signal_types"] = list(signal_types)
+        if signal_types:
+	    request.session["signal_types"] = list(signal_types)
 
     if "sensors" not in request.session:
         sensors = Sensor.objects.values_list('sensor_id', flat=True).all()
-        request.session["sensors"] = list(sensors)
+        if sensors:
+	    request.session["sensors"] = list(sensors)
 
     return request

@@ -1,5 +1,5 @@
 function draw_chart(data) {
-    // Glucose Average by Day chart
+    // Signals chart
      var chartOptions = {
         chart: {
             renderTo: 'chart_panel',

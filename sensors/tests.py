@@ -48,5 +48,11 @@ class SignalTestCase(TestCase):
 
         self.assertEqual(True, Sensor.objects.filter(sensor_id="test").count() == 1)
 
-        signal = Signal.objects.get(signal_id="temperature", date="2016-09-26")
-        self.assertEqual(30, signal.value)
+        signal_temperature = Signal.objects.get(signal_id="temperature", date="2016-09-26")
+        self.assertEqual(30, signal_temperature.value)
+
+	signal_rainfall = Signal.objects.get(signal_id="rainfall", date="2016-09-26")
+	self.assertEqual(400, signal_rainfall.value)
+
+	
+	

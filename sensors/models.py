@@ -47,13 +47,15 @@ class SignalManager(models.Manager):
                 if not data:
                     data.append(signal_from_csv)
                 else:
-                    for signal in data:
+                    found = False
+		    for signal in data:
                         # If the date and the signal type already exists, we update the values of the day
                         if signal.date == signal_from_csv.date and signal.signal_id == signal_from_csv.signal_id:
                             signal.value += signal_from_csv.value
                             signal.n += 1
-                        else:
-                            data.append(signal_from_csv)
+			    found = True
+                    if not found:
+                        data.append(signal_from_csv)
 
             data = self.calculate_temperature_avg(data)
             self.insert_signals(data)
