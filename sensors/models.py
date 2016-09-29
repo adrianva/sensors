@@ -1,10 +1,19 @@
 from __future__ import unicode_literals, division
-from django.db import models
+from django.db import models, IntegrityError, transaction
 import sys
 import csv
 import re
 import datetime
 
+
+class SignalCSV:
+    def __init__(self):
+        self.signal_id = ""
+        self.sensor_id = ""
+        self.date = None
+        self.date_acquisition = None
+        self.value = None
+        self.n = 1
 
 class SignalManager(models.Manager):
     def process_csv(self, csvfile):
@@ -15,28 +24,35 @@ class SignalManager(models.Manager):
         :return: Whether the process ended ok or not.
         """
         try:
-            data = {}
+            data = []
             sensor_id, date_acquisition = self.parse_csv_filename(csvfile.name)
 
-            Sensor.objects.create(sensor_id=sensor_id)
+            try:
+                with transaction.atomic():
+                    Sensor.objects.create(sensor_id=sensor_id)
+            except IntegrityError:
+                pass
 
             content = csv.reader(csvfile)
             for row in content:
-                signal_id = row[0]
+                signal_from_csv = SignalCSV()
+                signal_from_csv.signal_id = row[0]
+                signal_from_csv.sensor_id = sensor_id
+                signal_from_csv.date_acquisition = date_acquisition
+                signal_from_csv.value = float(row[2])
                 timestamp = row[1]
-                value = float(row[2])
-                date = datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d')
+                signal_from_csv.date = datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d')
 
-                # If the date and the signal type already exists, we update the values of the day
-                if date in data and signal_id in data[date]:
-                    data[date][signal_id]["value"] += float(row[2])
-                    data[date][signal_id]["n"] += 1
+                if not data:
+                    data.append(signal_from_csv)
                 else:
-                    data[date][signal_id] = {"sensor_id": sensor_id,
-                                             "date_acquisition": date_acquisition,
-                                             "value": value,
-                                             "n": 1
-                                             }
+                    # If the date and the signal type already exists, we update the values of the day
+                    for signal in data:
+                        if signal.date == signal_from_csv.date and signal.signal_id == signal_from_csv.signal_id:
+                            signal.value += signal_from_csv.value
+                            signal.n += 1
+                        else:
+                            data.append(signal_from_csv)
 
             data = self.calculate_temperature_avg(data)
             self.insert_signals(data)
@@ -67,21 +83,21 @@ class SignalManager(models.Manager):
         raise AttributeError
 
     @staticmethod
-    def calculate_temperature_avg(data):
-        for key in data.keys():
-            if 'temperature' in data[key]:
-                data[key]['temperature']["value"] = data[key]["temperature"]["value"] / data[key]["temperature"]["n"]
-        return data
+    def calculate_temperature_avg(signals):
+        for signal in signals:
+            if signal.signal_id == "temperature":
+                signal.value /= float(signal.n)
+        return signals
 
     @staticmethod
     def insert_signals(signals):
-        for key, value in signals.items():
+        for signal in signals:
             Signal.objects.create(
-                sensor_id=value["sensor_id"],
-                signal_id=value["signal_id"],
-                date=value["date"],
-                date_acquisition=key,
-                value=value["value"]
+                sensor_id=signal.sensor_id,
+                signal_id=signal.signal_id,
+                date=signal.date,
+                date_acquisition=signal.date_acquisition,
+                value=signal.value
             )
 
 

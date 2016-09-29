@@ -16,8 +16,9 @@
         <label class="col-md-4 control-label" for="selectbasic">Sensor ID</label>
         <div class="col-md-4">
             <select id="sensor" name="sensor" class="form-control">
-                <option value="sensor-1">sensor-1</option>
-                <option value="sensor-2">sensor-2</option>
+                {% for value in request.session.sensors %}
+                    <option value="{{ value }}">{{ value }}</option>
+                {% endfor %}
             </select>
         </div>
     </div>

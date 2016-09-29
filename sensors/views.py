@@ -2,7 +2,6 @@ from django.shortcuts import render
 from django.shortcuts import HttpResponse
 from django.db import transaction
 import json
-import csv
 
 from sensors.models import Signal, SignalType, Sensor
 import reports
