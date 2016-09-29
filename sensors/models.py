@@ -15,6 +15,7 @@ class SignalCSV:
         self.value = None
         self.n = 1
 
+
 class SignalManager(models.Manager):
     def process_csv(self, csvfile):
         """
@@ -46,8 +47,8 @@ class SignalManager(models.Manager):
                 if not data:
                     data.append(signal_from_csv)
                 else:
-                    # If the date and the signal type already exists, we update the values of the day
                     for signal in data:
+                        # If the date and the signal type already exists, we update the values of the day
                         if signal.date == signal_from_csv.date and signal.signal_id == signal_from_csv.signal_id:
                             signal.value += signal_from_csv.value
                             signal.n += 1
