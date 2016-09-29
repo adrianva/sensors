@@ -1,26 +1,25 @@
 from django.test import TestCase
-from sensors.models import Signal, SignalManager
+from sensors.models import Signal, Sensor
+import os
+import datetime
 import reports
 
 
 class SignalTestCase(TestCase):
     def setUp(self):
-        Signal.objects.create(id=1,
-                              sensor_id='sensor-1',
+        Signal.objects.create(sensor_id='sensor-1',
                               signal_id='temperature',
                               date='2016-09-20',
                               date_acquisition='2016-09-21',
                               value=32.5)
 
-        Signal.objects.create(id=2,
-                              sensor_id='sensor-1',
+        Signal.objects.create(sensor_id='sensor-1',
                               signal_id='temperature',
                               date='2016-09-21',
                               date_acquisition='2016-09-21',
                               value=34.7)
 
-        Signal.objects.create(id=3,
-                              sensor_id='sensor-2',
+        Signal.objects.create(sensor_id='sensor-2',
                               signal_id='rain',
                               date='2016-09-21',
                               date_acquisition='2016-09-21',
@@ -40,10 +39,14 @@ class SignalTestCase(TestCase):
         sensor_id, date = Signal.objects.parse_csv_filename(filename)
 
         self.assertEqual("sensor1", sensor_id)
-        self.assertEqual("20092016", date)
+        self.assertEqual(datetime.datetime(2016, 9, 20), date)
 
     def test_process_csv(self):
-        with open("tests/test-20092016.csv", "rb") as csvfile:
+        os.chdir("tests/")
+        with open("test-20092016.csv", "rb") as csvfile:
             Signal.objects.process_csv(csvfile)
 
-        self.assertEqual(True, Signal.objects.filter(sensor_id="test").count() == 1)
+        self.assertEqual(True, Sensor.objects.filter(sensor_id="test").count() == 1)
+
+        signal = Signal.objects.get(signal_id="temperature", date="2016-09-26")
+        self.assertEqual(30, signal.value)

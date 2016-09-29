@@ -6,7 +6,7 @@ class ChartData(object):
         for signal in signals:
             data['dates'].append(signal.date.strftime('%m-%d'))
 
-            if not data.has_key(signal.signal_id):
+            if signal.signal_id not in data:
                 data[signal.signal_id] = []
                 data['signal'] = signal.signal_id
 
