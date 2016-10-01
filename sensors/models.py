@@ -48,12 +48,12 @@ class SignalManager(models.Manager):
                     data.append(signal_from_csv)
                 else:
                     found = False
-		    for signal in data:
+                    for signal in data:
                         # If the date and the signal type already exists, we update the values of the day
                         if signal.date == signal_from_csv.date and signal.signal_id == signal_from_csv.signal_id:
                             signal.value += signal_from_csv.value
                             signal.n += 1
-			    found = True
+                            found = True
                     if not found:
                         data.append(signal_from_csv)
 
@@ -74,7 +74,8 @@ class SignalManager(models.Manager):
         :return: signal_id, date_acquisition
 
         """
-        filename_regexp = re.search('(.*)-(\d{2}\d{2}\d{4})\.csv', csv_filename)  # Regexp for <sensor_id>-<ddmmyyyy>.csv
+        # Regexp for <sensor_id>-<ddmmyyyy>.csv
+        filename_regexp = re.search('(.*)-(\d{2}\d{2}\d{4})\.csv', csv_filename)
 
         if filename_regexp:
             signal_id = filename_regexp.group(1)
