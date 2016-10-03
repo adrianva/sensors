@@ -56,9 +56,8 @@ function create_chart() {
         },
 
         // handle a non-successful response
-        error : function(xhr, errmsg, err) {
-            $('#chart_panel').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
-                " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+        error : function(xhr) {
+            $('#feedback').html("<div class='alert alert-danger'>Oops! We have encountered an error."); // add the error to the dom
             console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
         }
     });
@@ -89,15 +88,13 @@ function upload_csv() {
         // handle a successful response
         success : function(json) {
             console.log(json); // log the returned json to the console
-            $('#feedback').html("<div class='alert-box alert radius' data-alert>Data successfully uploaded! " +
-                " <a href='#' class='close'>&times;</a></div>"); // add the success msg to the dom
+            $('#feedback').html("<div class='alert alert-success'>Data successfully uploaded!"); // add the success msg to the dom
             console.log("success"); // another sanity check
         },
 
         // handle a non-successful response
-        error : function(xhr, errmsg, err) {
-            $('#feedback').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
-                " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+        error : function(xhr) {
+            $('#feedback').html("<div class='alert alert-danger'>Oops! We have encountered an error."); // add the error to the dom
             console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
         }
     });

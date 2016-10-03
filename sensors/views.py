@@ -11,7 +11,7 @@ import reports
 def upload_csv(request):
     if request.method == 'POST':
         data = {}
-        Signal.objects.process_csv(request.FILES["filebutton"])
+        Signal.objects.process_csv(request.FILES.getlist("filebutton"))
         data["success"] = "success"
         return HttpResponse(json.dumps(data), content_type='application/json')
 
@@ -36,11 +36,11 @@ def __init_session(request):
     if "signal_types" not in request.session:
         signal_types = SignalType.objects.values_list('signal_type', flat=True).all()
         if signal_types:
-	    request.session["signal_types"] = list(signal_types)
+            request.session["signal_types"] = list(signal_types)
 
     if "sensors" not in request.session:
         sensors = Sensor.objects.values_list('sensor_id', flat=True).all()
         if sensors:
-	    request.session["sensors"] = list(sensors)
+            request.session["sensors"] = list(sensors)
 
     return request

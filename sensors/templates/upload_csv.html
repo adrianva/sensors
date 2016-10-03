@@ -15,14 +15,14 @@
             <div class="form-group">
                 <label class="col-md-4 control-label" for="filebutton">CSV FIle</label>
                 <div class="col-md-4">
-                <input id="filebutton" name="filebutton" class="input-file" type="file" accept=".csv"/>
+                <input id="filebutton" name="filebutton" class="input-file" type="file" accept=".csv" multiple/>
                 </div>
             </div>
 
             </fieldset>
             <button type="submit" id="submit-csv" class="btn btn-primary">Upload</button>
         </form>
-        <div id="feedback"></div>
+        <div id="feedback" class="alert-dismissible"></div>
     </div><!-- /.container -->
 {% endblock %}
 

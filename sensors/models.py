@@ -10,60 +10,112 @@ class SignalCSV:
     def __init__(self):
         self.signal_id = ""
         self.sensor_id = ""
+        self.timestamp = None
         self.date = None
         self.date_acquisition = None
         self.value = None
+
+    def __eq__(self, other):
+        return self.signal_id == other.signal_id and self.sensor_id == other.sensor_id \
+               and self.timestamp == other.timestamp
+
+
+class SignalTotal:
+    def __init__(self):
+        self.signal_id = ""
+        self.sensor_id = ""
+        self.date = None
+        self.date_acquisition = None
+        self.total = None
         self.n = 1
 
 
 class SignalManager(models.Manager):
-    def process_csv(self, csvfile):
+    def process_multiple_csv(self, csvfiles):
         """
-        Process the CSV file uploaded by the user. If the signal is temperature, we get the average temperature of
+        Process the CSV files uploaded by the user. If the signal is temperature, we get the average temperature of
         the day. If it is rainfall, we simply sum all the values of the day.
-        :param csvfile: The CSV file object.
+        :param csvfiles: The CSV files objects.
         :return: Whether the process ended ok or not.
         """
         try:
             data = []
-            sensor_id, date_acquisition = self.parse_csv_filename(csvfile.name)
+            for csvfile in csvfiles:
+                data = self.remove_duplicated_rows(csvfile, data)
 
-            try:
-                with transaction.atomic():
-                    Sensor.objects.create(sensor_id=sensor_id)
-            except IntegrityError:
-                pass
-
-            content = csv.reader(csvfile)
-            for row in content:
-                signal_from_csv = SignalCSV()
-                signal_from_csv.signal_id = row[0]
-                signal_from_csv.sensor_id = sensor_id
-                signal_from_csv.date_acquisition = date_acquisition
-                signal_from_csv.value = float(row[2])
-                timestamp = row[1]
-                signal_from_csv.date = datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d')
-
-                if not data:
-                    data.append(signal_from_csv)
-                else:
-                    found = False
-                    for signal in data:
-                        # If the date and the signal type already exists, we update the values of the day
-                        if signal.date == signal_from_csv.date and signal.signal_id == signal_from_csv.signal_id:
-                            signal.value += signal_from_csv.value
-                            signal.n += 1
-                            found = True
-                    if not found:
-                        data.append(signal_from_csv)
-
-            data = self.calculate_temperature_avg(data)
-            self.insert_signals(data)
+            signals = self.obtain_totals(data)
+            #data = self.calculate_temperature_avg(data)
+            self.insert_signals(signals)
 
             return "success"
         except AttributeError:
             print(sys.exc_info())
             return "error"
+
+    def remove_duplicated_rows(self, csvfile, data):
+        """
+        Remove the duplicated rows in the CSV file. One row is duplicated when another one exists with the same
+        signal, timestamp and sensor ID. When this happens we keep the most recent data
+        :param csvfile: The csv file to be processed
+        :param data: The data we have already processed
+        :return: The new data
+        """
+        sensor_id, date_acquisition = self.parse_csv_filename(csvfile.name)
+
+        try:
+            with transaction.atomic():
+                Sensor.objects.create(sensor_id=sensor_id)
+        except IntegrityError:
+            pass
+
+        content = csv.reader(csvfile)
+        for row in content:
+            signal_from_csv = SignalCSV()
+            signal_from_csv.signal_id = row[0]
+            signal_from_csv.sensor_id = sensor_id
+            signal_from_csv.date_acquisition = date_acquisition
+            signal_from_csv.value = float(row[2])
+            signal_from_csv.timestamp = row[1]
+            signal_from_csv.date = datetime.datetime.fromtimestamp(int(signal_from_csv.timestamp)).strftime('%Y-%m-%d')
+
+            if not data:
+                data.append(signal_from_csv)
+            else:
+                found = False
+                for signal in data:
+                    # If the data already exists we keep the most recent value
+                    if signal_from_csv == signal and signal_from_csv.date_acquisition >= signal.date_acquisition:
+                        signal.value = signal_from_csv.value
+                        found = True
+                if not found:
+                    data.append(signal_from_csv)
+        return data
+
+    def obtain_totals(self, signal_measurements):
+        signals = []
+        for signal in signal_measurements:
+            signal_with_totals = SignalTotal()
+            signal_with_totals.signal_id = signal.signal_id
+            signal_with_totals.sensor_id = signal.sensor_id
+            signal_with_totals.date = signal.date
+            signal_with_totals.date_acquisition = signal.date_acquisition
+            signal_with_totals.total = signal.value
+
+            if not signals:
+                signals.append(signal_with_totals)
+            else:
+                found = False
+                for element in signals:
+                    # If the date and the signal type already exists, we update the values of the day
+                    if element.date == signal_with_totals.date and element.signal_id == signal_with_totals.signal_id:
+                        element.total += signal_with_totals.total
+                        element.n += 1
+                        found = True
+                if not found:
+                    signals.append(signal_with_totals)
+
+        signals = self.calculate_temperature_avg(signals)
+        return signals
 
     @staticmethod
     def parse_csv_filename(csv_filename):
@@ -90,7 +142,7 @@ class SignalManager(models.Manager):
     def calculate_temperature_avg(signals):
         for signal in signals:
             if signal.signal_id == "temperature":
-                signal.value /= float(signal.n)
+                signal.total /= float(signal.n)
         return signals
 
     @staticmethod
@@ -101,7 +153,7 @@ class SignalManager(models.Manager):
                 signal_id=signal.signal_id,
                 date=signal.date,
                 date_acquisition=signal.date_acquisition,
-                value=signal.value
+                value=signal.total
             )
 
 
