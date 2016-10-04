@@ -7,6 +7,9 @@ import datetime
 
 
 class SignalCSV:
+    """
+    This class represent a row read from a CSV file
+    """
     def __init__(self):
         self.signal_id = ""
         self.sensor_id = ""
@@ -21,6 +24,9 @@ class SignalCSV:
 
 
 class SignalTotal:
+    """
+    This class represents a signal with the sum of all values for the given day and the number of measures (n)
+    """
     def __init__(self):
         self.signal_id = ""
         self.sensor_id = ""
@@ -33,9 +39,9 @@ class SignalTotal:
 class SignalManager(models.Manager):
     def process_multiple_csv(self, csvfiles):
         """
-        Process the CSV files uploaded by the user. If the signal is temperature, we get the average temperature of
-        the day. If it is rainfall, we simply sum all the values of the day.
-        :param csvfiles: The CSV files objects.
+        Process the CSV files uploaded by the user. First we simply remove all duplicated data
+         and then we obtain the totals by day .
+        :param csvfiles: The CSV files to be processed.
         :return: Whether the process ended ok or not.
         """
         try:
@@ -44,7 +50,6 @@ class SignalManager(models.Manager):
                 data = self.remove_duplicated_rows(csvfile, data)
 
             signals = self.obtain_totals(data)
-            #data = self.calculate_temperature_avg(data)
             self.insert_signals(signals)
 
             return "success"
